@@ -1,0 +1,2 @@
+#!/bin/sh
+vex sync --git-commit-msg "$1"
