@@ -1,59 +1,100 @@
 # vex
 
 **vex** — это инструмент для автоматической генерации версии проекта  
-(C/C++ / make / cmake) на основе Git и упрощённой модели Semantic Versioning.
+(`C/C++` / `make` / `cmake`) на основе `Git` и упрощённой модели `Semantic Versioning`
 
 ---
 
-## Идея
+## Описание
 
-vex решает проблему отсутствия дисциплины в версиях:
+**vex** решает проблему отсутствия дисциплины в версиях:
 
-- версия увеличивается автоматически при git merge в main
-- тип изменения определяется по commit message
-- генерируется version.h для использования в коде
+- версия увеличивается автоматически при `git merge` в ветку `main`
+- тип изменения определяется по `commit message`
+- генерируется `version.h` для использования в `C/C++`
 - поддерживается локальная разработка без CI
 
 ---
 
-## Установка
+## Установка (временно с использованием pipx)
 
-    pipx install -e .
-    pipx ensurepath
+```bash
+pipx install -e .
+pipx ensurepath
+```
 
-## Удаление
+## Удаление (временно с использованием pipx)
 
-    pipx uninstall vex
+```bash
+pipx uninstall vex
+```
 
 ---
 
 ## Быстрый старт
 
-    vex init
+```bash
+git init
+git commit -m "chore: initial commit"
+vex init
+git checkout -b dev
+# <changes>
+git commit -m "feat: useful function"
+git checkout main
+git merge dev
+```
 
 ---
 
-## Команды
+## Взаимодействие с **vex**
 
-    vex init  
-    vex sync --build  
-    vex sync --git-commit-msg  
-    vex sync --git-post-merge  
+### Инициализация в директории проекта
+
+```bash
+vex init
+```
+
+### Генерация файла version.h перед сборкой проекта
+
+#### Требуется добавить вызов перед `make`:
+
+```bash
+vex sync --build
+```
+
+### Валидация commit message
+
+#### Содержится в `$(cwd)/.git/hooks/commit-msg`
+
+```bash
+#!/bin/sh
+vex sync --git-commit-msg
+```
+
+### Обновление версии при соблюдении условий
+
+#### Содержится в `$(cwd)/.git/hooks/post-merge`
+
+```bash
+#!/bin/sh
+vex sync --git-post-merge
+```
 
 ---
 
-## Версионирование
+## Правила версионирования
 
-    feat!  -> MAJOR  
-    feat   -> MINOR  
-    fix    -> PATCH  
-    perf   -> PATCH  
-    refactor -> PATCH  
+    feat!    -> MAJOR
+    feat     -> MINOR
+    fix      -> PATCH
+    perf     -> PATCH
+    refactor -> PATCH
+
+### Примечание
+
+При `git commit` с префиксом `feat!` необходимо
+использовать `одинарные кавычки`:
+
+    git commit -m 'feat!: api changed'
 
 ---
-
-## Структура
-
-    .vex/state.json  
-    version.json  
-    generated/version.h
