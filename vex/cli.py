@@ -1,9 +1,19 @@
 import argparse
 import sys
+import logging
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
 from .app import VexApplication
+
+
+class LowercaseFormatter(logging.Formatter):
+    def format(self, record):
+        original = record.levelname
+        record.levelname = original.lower()
+        result = super().format(record)
+        record.levelname = original
+        return result
 
 
 def get_app_version() -> str:
@@ -17,6 +27,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="vex",
         description="Version generator for make/cmake projects",
+    )
+
+    parser.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        help="Enable debug logging",
     )
 
     parser.add_argument(
@@ -117,7 +133,6 @@ def handle_init(args: argparse.Namespace) -> int:
     app = VexApplication(Path.cwd())
     app.init_project(force=args.force)
 
-    print(f"vex: initialized in {Path.cwd()}")
     return 0
 
 
@@ -162,13 +177,28 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 
+    level = logging.DEBUG if args.verbose else logging.INFO
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(
+        LowercaseFormatter("vex [%(levelname)s]: %(message)s")
+    )
+
+    logging.basicConfig(
+        level=level,
+        format="%(levelname)s: %(message)s",
+        handlers=[handler]
+    )
+
+    logger = logging.getLogger("vex")
+
     try:
         return args.handler(args)
     except KeyboardInterrupt:
-        print("vex: interrupted", file=sys.stderr)
+        logger.warning("Interrupted")
         return 130
     except Exception as e:
-        print(f"vex: {e}", file=sys.stderr)
+        logger.error(e)
         return 1
 
 

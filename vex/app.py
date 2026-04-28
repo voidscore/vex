@@ -1,4 +1,5 @@
 import json
+import logging
 
 from pathlib import Path
 from importlib import resources
@@ -18,6 +19,7 @@ class VexApplication:
         self.vex_dir = self.root_dir / ".vex"
         self.state_file = self.vex_dir / "state.json"
         self.version_file = self.root_dir / "version.json"
+        self.logger = logging.getLogger("vex")
 
     def init_project(self, force: bool = False):
         if self._is_initialized() and not force:
