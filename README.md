@@ -34,7 +34,7 @@ pipx uninstall vex
 ## Быстрый старт
 
 ```bash
-git init
+git init -b main
 git commit -m "chore: initial commit"
 vex init
 git checkout -b dev
