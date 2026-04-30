@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="vex",
-    version="0.2.0",
+    version="0.2.1",
     description="Version generator for make/cmake projects",
     packages=find_packages(),
     python_requires=">=3.10",
