@@ -33,6 +33,9 @@ class VexApplication:
         self.logger.info(f"initialized in {self.root_dir}")
 
     def sync_build(self):
+        if not self._is_initialized():
+            raise VexError("is not initialized, you can use 'sync'")
+
         self._sync_git_integration()
 
         state = self._get_state()
@@ -47,6 +50,9 @@ class VexApplication:
         self.logger.info(f"command 'sync --build' complete")
 
     def sync_git_commit_msg(self, message_file: Path) -> None:
+        if not self._is_initialized():
+            raise VexError("is not initialized, you can use 'sync'")
+
         self._sync_git_integration()
         result = CommitMessageValidator().validate_file(str(message_file))
 
@@ -56,6 +62,9 @@ class VexApplication:
         self.logger.info(f"command 'sync --git-commit-msg' complete")
 
     def sync_git_post_merge(self) -> None:
+        if not self._is_initialized():
+            raise VexError("is not initialized, you can use 'sync'")
+        
         # Синхронизируем git-интеграцию:
         # - проверяем наличие git;
         # - проверяем, является ли проект git-репозиторием;
