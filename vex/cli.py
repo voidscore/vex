@@ -7,13 +7,24 @@ from pathlib import Path
 from .app import VexApplication
 
 
-class LowercaseFormatter(logging.Formatter):
+class LoggerFormatter(logging.Formatter):
+    COLORS = {
+        logging.DEBUG: "\033[36m",
+        logging.INFO: "\033[32m",
+        logging.WARNING: "\033[33m",
+        logging.ERROR: "\033[31m",
+        logging.CRITICAL: "\033[41m",
+    }
+    RESET = "\033[0m"
+
     def format(self, record):
         original = record.levelname
-        record.levelname = original.lower()
-        result = super().format(record)
-        record.levelname = original
-        return result
+        try:
+            color = self.COLORS.get(record.levelno, "")
+            record.levelname = f"{color}{original}{self.RESET}".lower()
+            return super().format(record)
+        finally:
+            record.levelname = original
 
 
 def get_app_version() -> str:
@@ -181,7 +192,7 @@ def main(argv: list[str] | None = None) -> int:
 
     handler = logging.StreamHandler()
     handler.setFormatter(
-        LowercaseFormatter("vex [%(levelname)s]: %(message)s")
+        LoggerFormatter("vex [%(levelname)s]: %(message)s")
     )
 
     logging.basicConfig(

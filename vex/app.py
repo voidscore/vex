@@ -24,11 +24,13 @@ class VexApplication:
     def init_project(self, force: bool = False):
         if self._is_initialized() and not force:
             raise VexError(
-                f"vex is already initialized in {self.root_dir.resolve()}"
+                f"already initialized, you can use '--force'"
             )
         
         self._init_env(force=force)
         self._sync_git_integration(force=force)
+
+        self.logger.info(f"initialized in {self.root_dir}")
 
     def sync_build(self):
         self._sync_git_integration()
@@ -42,12 +44,16 @@ class VexApplication:
 
         self._generate_version_from_template()
 
+        self.logger.info(f"command 'sync --build' complete")
+
     def sync_git_commit_msg(self, message_file: Path) -> None:
         self._sync_git_integration()
         result = CommitMessageValidator().validate_file(str(message_file))
 
         if not result.valid:
             raise VexError(result.error or "invalid commit message")
+        
+        self.logger.info(f"command 'sync --git-commit-msg' complete")
 
     def sync_git_post_merge(self) -> None:
         # Синхронизируем git-интеграцию:
@@ -137,6 +143,8 @@ class VexApplication:
         # Поэтому ещё раз обновляем .vex/state.json,
         # чтобы там был актуальный git hash/short_hash/dirty.
         self._sync_git_integration()
+
+        self.logger.info(f"command 'sync --git-post-merge' complete")
 
     def _is_initialized(self) -> bool:
         return (
