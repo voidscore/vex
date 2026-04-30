@@ -160,6 +160,14 @@ class GitRepository:
             commit_count=commit_count,
             is_dirty=is_dirty,
         )
+    
+    def init(self) -> None:
+        self.ensure_installed()
+        self._exec("init")
+
+    def checkout_new_branch(self, branch: str) -> None:
+        self.ensure_initialized()
+        self._exec("checkout", "-b", branch)
 
     def add(self, path: Path | str) -> None:
         self.ensure_initialized()

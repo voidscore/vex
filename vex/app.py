@@ -32,6 +32,47 @@ class VexApplication:
 
         self.logger.info(f"initialized in {self.root_dir}")
 
+    def init_project_with_git(self, force: bool = False) -> None:
+        self.logger.info("initializing project with git in %s", self.root_dir.resolve())
+
+        git = GitRepository(self.root_dir)
+
+        already_vex_initialized = self._is_initialized()
+        already_git_initialized = git.is_initialized()
+
+        if already_vex_initialized and already_git_initialized and not force:
+            raise VexError(
+                "already initialized, you can use '--force'"
+            )
+
+        if not already_git_initialized:
+            self.logger.info("initializing git repository")
+            git.init()
+        else:
+            self.logger.info("git repository already exists")
+
+        self._init_env(force=force)
+        self._sync_git_integration(force=force)
+
+        git.add(self.root_dir / ".gitignore")
+        git.add(self.version_file)
+
+        if git.has_staged_changes():
+            self.logger.info("creating initial commit")
+            git.commit("chore: initial commit")
+        else:
+            self.logger.info("nothing to commit for initial commit")
+
+        info = git.get_info()
+
+        if info.branch != "dev":
+            self.logger.info("creating and switching to dev branch")
+            git.checkout_new_branch("dev")
+
+        self._sync_git_integration(force=force)
+
+        self.logger.info("project initialized with git")
+
     def sync_build(self):
         if not self._is_initialized():
             raise VexError("is not initialized, you should use 'init'")

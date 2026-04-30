@@ -77,6 +77,12 @@ def add_init_parser(subparsers: argparse._SubParsersAction) -> None:
         help="Overwrite existing vex files",
     )
 
+    parser.add_argument(
+        "--git",
+        action="store_true",
+        help="Create default git environment",
+    )
+
     parser.set_defaults(handler=handle_init)
 
 
@@ -142,7 +148,11 @@ def add_version_parser(subparsers: argparse._SubParsersAction) -> None:
 
 def handle_init(args: argparse.Namespace) -> int:
     app = VexApplication(Path.cwd())
-    app.init_project(force=args.force)
+
+    if args.git:
+        app.init_project_with_git(force=args.force)
+    else:
+        app.init_project(force=args.force)
 
     return 0
 
